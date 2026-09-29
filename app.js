@@ -46,27 +46,89 @@ function initMonths() {
 }
 
 function bind() {
-  E.authForm.onsubmit = login;
-  E.signup.onclick = signup;
-  E.logout.onclick = () => db.auth.signOut();
-  E.month.onchange = loadData;
-  E.refresh.onclick = async () => { await loadCategoryRules(); await loadData(); };
-  E.add.onclick = () => { E.txForm.reset(); E.date.value = new Date().toISOString().slice(0,10); E.modal.classList.add('show'); };
-  E.cancel.onclick = () => E.modal.classList.remove('show');
-  E.txForm.onsubmit = addTx;
-  E.rows.onclick = deleteTx;
-  E.saveBudget.onclick = saveBudget;
-  E.exportBtn.onclick = exportJson;
-  E.label.addEventListener('input', () => { const category = detectCategory(E.label.value); if (category && CATS.includes(category)) E.category.value = category; });
-  E.rulesBtn.onclick = async () => { await loadCategoryRules(); resetRuleForm(); E.rulesModal.classList.add('show'); };
-  E.closeRules.onclick = () => E.rulesModal.classList.remove('show');
-  E.ruleForm.onsubmit = saveCategoryRule;
-  E.cancelRuleEdit.onclick = resetRuleForm;
-  E.rulesList.onclick = handleRuleAction;
-  E.modal.onclick = e => { if (e.target === E.modal) E.modal.classList.remove('show'); };
-  E.rulesModal.onclick = e => { if (e.target === E.rulesModal) E.rulesModal.classList.remove('show'); };
-}
 
+    E.authForm.onsubmit = login;
+    E.signup.onclick = signup;
+    E.logout.onclick = () => db.auth.signOut();
+
+    E.month.onchange = loadData;
+
+    E.refresh.onclick = async () => {
+        await loadCategoryRules();
+        await loadData();
+    };
+
+    E.add.onclick = () => {
+        E.txForm.reset();
+        E.date.value = new Date().toISOString().slice(0, 10);
+        E.modal.classList.add("show");
+    };
+
+    E.cancel.onclick = () =>
+        E.modal.classList.remove("show");
+
+    E.txForm.onsubmit = addTx;
+    E.rows.onclick = deleteTx;
+
+    E.saveBudget.onclick = saveBudget;
+    E.exportBtn.onclick = exportJson;
+
+    // Catégorisation automatique
+    E.label.addEventListener("input", () => {
+
+        const category =
+            detectCategory(E.label.value);
+
+        if (
+            category &&
+            CATS.includes(category)
+        ) {
+            E.category.value = category;
+        }
+
+    });
+
+    // Bouton règles
+    E.rulesBtn.onclick = async () => {
+
+        console.log("Clic sur Règles");
+
+        await loadCategoryRules();
+
+        resetRuleForm();
+
+        E.rulesModal.classList.add("show");
+
+    };
+
+    E.closeRules.onclick = () =>
+        E.rulesModal.classList.remove("show");
+
+    E.ruleForm.onsubmit = saveCategoryRule;
+
+    E.cancelRuleEdit.onclick =
+        resetRuleForm;
+
+    E.rulesList.onclick =
+        handleRuleAction;
+
+    E.modal.onclick = e => {
+
+        if (e.target === E.modal) {
+            E.modal.classList.remove("show");
+        }
+
+    };
+
+    E.rulesModal.onclick = e => {
+
+        if (e.target === E.rulesModal) {
+            E.rulesModal.classList.remove("show");
+        }
+
+    };
+
+}
 async function boot() {
   initMonths(); bind();
   if (!configured) { E.authMsg.textContent='Configurez config.js puis publiez le dossier.'; return; }
