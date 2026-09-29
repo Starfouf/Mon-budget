@@ -19,15 +19,15 @@ const AUTO_CATEGORIES = {
     "deliveroo": "Livraison repas",
 
     // Transport
-    "sncf": "Train",
-    "total": "Carburant",
-    "esso": "Carburant",
-    "shell": "Carburant",
-    "bp": "Carburant",
+    "sncf": "Transport",
+    "total": "Transport",
+    "esso": "Transport",
+    "shell": "Transport",
+    "bp": "Transport",
 
     // Logement
-    "edf": "Électricité",
-    "engie": "Gaz",
+    "edf": "Logement",
+    "engie": "Logement",
     "orange": "Internet",
     "free": "Internet",
     "sfr": "Internet",
@@ -45,18 +45,18 @@ const AUTO_CATEGORIES = {
     "prime video": "Abonnements",
 
     // Maison
-    "ikea": "Mobilier",
-    "leroy merlin": "Bricolage",
-    "castorama": "Bricolage",
-    "boulanger": "Électroménager",
-    "darty": "Électroménager",
+    "ikea": "Maison",
+    "leroy merlin": "Maison",
+    "castorama": "Maison",
+    "boulanger": "Maison",
+    "darty": "Maison",
 
     // Sport
     "decathlon": "Sport",
 
     // Santé
-    "pharmacie": "Pharmacie",
-    "doctolib": "Médecin"
+    "pharmacie": "Santé",
+    "doctolib": "Santé"
 };
 
 function detectCategory(label) {
@@ -115,15 +115,21 @@ const $ = (id) => document.getElementById(id),
     amount: $("amount"),
   };
 const CATS = [
-  "Logement",
-  "Courses",
-  "Transport",
-  "Loisirs",
-  "Abonnements",
-  "Santé",
-  "Épargne",
-  "Salaire",
-  "Autre",
+    "Logement",
+    "Internet",
+    "Courses",
+    "Restaurant",
+    "Transport",
+    "Loisirs",
+    "Abonnements",
+    "Sport",
+    "Santé",
+    "Salaire",
+    "Épargne",
+    "Livraison Repas",
+    "Jeux vidéo",
+    "Maison",
+    "Autre"
 ];
 let user = null,
   tx = [],
