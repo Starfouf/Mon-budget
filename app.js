@@ -39,9 +39,9 @@ const AUTO_CATEGORIES = {
     "xbox": "Jeux vidéo",
 
     // Streaming
-    "spotify": "Spotify",
-    "netflix": "Netflix",
-    "youtube": "YouTube Premium",
+    "spotify": "Abonnements",
+    "netflix": "Abonnements",
+    "youtube": "Abonnements",
     "prime video": "Abonnements",
 
     // Maison
