@@ -1,77 +1,91 @@
 "use strict";
 
-const AUTO_CATEGORIES = {
+let AUTO_CATEGORIES = {
+  // Courses
+  carrefour: "Courses",
+  leclerc: "Courses",
+  auchan: "Courses",
+  intermarche: "Courses",
+  lidl: "Courses",
+  aldi: "Courses",
+  "u express": "Courses",
 
-    // Courses
-    "carrefour": "Courses",
-    "leclerc": "Courses",
-    "auchan": "Courses",
-    "intermarche": "Courses",
-    "lidl": "Courses",
-    "aldi": "Courses",
-    "u express": "Courses",
+  // Restaurant
+  mcdonald: "Restaurant",
+  "burger king": "Restaurant",
+  kfc: "Restaurant",
+  "uber eats": "Livraison repas",
+  deliveroo: "Livraison repas",
 
-    // Restaurant
-    "mcdonald": "Restaurant",
-    "burger king": "Restaurant",
-    "kfc": "Restaurant",
-    "uber eats": "Livraison repas",
-    "deliveroo": "Livraison repas",
+  // Transport
+  sncf: "Transport",
+  total: "Transport",
+  esso: "Transport",
+  shell: "Transport",
+  bp: "Transport",
 
-    // Transport
-    "sncf": "Transport",
-    "total": "Transport",
-    "esso": "Transport",
-    "shell": "Transport",
-    "bp": "Transport",
+  // Logement
+  edf: "Logement",
+  engie: "Logement",
+  orange: "Internet",
+  free: "Internet",
+  sfr: "Internet",
+  bouygues: "Internet",
 
-    // Logement
-    "edf": "Logement",
-    "engie": "Logement",
-    "orange": "Internet",
-    "free": "Internet",
-    "sfr": "Internet",
-    "bouygues": "Internet",
+  // Loisirs
+  steam: "Jeux vidéo",
+  playstation: "Jeux vidéo",
+  xbox: "Jeux vidéo",
 
-    // Loisirs
-    "steam": "Jeux vidéo",
-    "playstation": "Jeux vidéo",
-    "xbox": "Jeux vidéo",
+  // Streaming
+  spotify: "Abonnements",
+  netflix: "Abonnements",
+  youtube: "Abonnements",
+  "prime video": "Abonnements",
 
-    // Streaming
-    "spotify": "Abonnements",
-    "netflix": "Abonnements",
-    "youtube": "Abonnements",
-    "prime video": "Abonnements",
+  // Maison
+  ikea: "Maison",
+  "leroy merlin": "Maison",
+  castorama: "Maison",
+  boulanger: "Maison",
+  darty: "Maison",
 
-    // Maison
-    "ikea": "Maison",
-    "leroy merlin": "Maison",
-    "castorama": "Maison",
-    "boulanger": "Maison",
-    "darty": "Maison",
+  // Sport
+  decathlon: "Sport",
 
-    // Sport
-    "decathlon": "Sport",
-
-    // Santé
-    "pharmacie": "Santé",
-    "doctolib": "Santé"
+  // Santé
+  pharmacie: "Santé",
+  doctolib: "Santé",
 };
 
 function detectCategory(label) {
+  const libelle = label.toLowerCase().trim();
 
-    const libelle = label.toLowerCase().trim();
-
-    for (const keyword in AUTO_CATEGORIES) {
-
-        if (libelle.includes(keyword)) {
-            return AUTO_CATEGORIES[keyword];
-        }
-
+  for (const keyword in AUTO_CATEGORIES) {
+    if (libelle.includes(keyword)) {
+      return AUTO_CATEGORIES[keyword];
     }
+  }
 
-    return "";
+  return "";
+}
+async function loadCategoryRules() {
+  const { data, error } = await db
+    .from("category_rules")
+    .select("keyword, category");
+
+  if (error) {
+    console.error("Erreur chargement règles :", error);
+    return;
+  }
+
+  AUTO_CATEGORIES = {};
+
+  data.forEach((rule) => {
+    AUTO_CATEGORIES[rule.keyword.toLowerCase()] = rule.category;
+  });
+
+  console.log("Règles chargées :", AUTO_CATEGORIES);
 }
 const cfg = window.BUDGET_CONFIG || {};
 const configured = !String(cfg.supabaseUrl).startsWith("REMPLACEZ_");
@@ -115,21 +129,21 @@ const $ = (id) => document.getElementById(id),
     amount: $("amount"),
   };
 const CATS = [
-    "Logement",
-    "Internet",
-    "Courses",
-    "Restaurant",
-    "Transport",
-    "Loisirs",
-    "Abonnements",
-    "Sport",
-    "Santé",
-    "Salaire",
-    "Épargne",
-    "Livraison Repas",
-    "Jeux vidéo",
-    "Maison",
-    "Autre"
+  "Logement",
+  "Internet",
+  "Courses",
+  "Restaurant",
+  "Transport",
+  "Loisirs",
+  "Abonnements",
+  "Sport",
+  "Santé",
+  "Salaire",
+  "Épargne",
+  "Livraison Repas",
+  "Jeux vidéo",
+  "Maison",
+  "Autre",
 ];
 let user = null,
   tx = [],
@@ -165,58 +179,57 @@ function initMonths() {
 }
 async function boot() {
   initMonths();
-  bind();
+
   if (!configured) {
-    E.authMsg.textContent =
-      "Configurez config.js puis publiez le dossier. Consultez README.txt.";
+    E.authMsg.textContent = "Configurez config.js puis publiez le dossier.";
+
     return;
   }
+
+  await loadCategoryRules();
+
+  bind();
+
   const { data } = await db.auth.getSession();
-  if (data.session) await signedIn(data.session.user);
+
+  if (data.session) {
+    await signedIn(data.session.user);
+  }
+
   db.auth.onAuthStateChange((_e, s) => (s ? signedIn(s.user) : signedOut()));
 }
 function bind() {
+  E.authForm.onsubmit = login;
+  E.signup.onclick = signup;
+  E.logout.onclick = () => db.auth.signOut();
 
-    E.authForm.onsubmit = login;
-    E.signup.onclick = signup;
-    E.logout.onclick = () => db.auth.signOut();
+  E.month.onchange = loadData;
+  E.refresh.onclick = loadData;
 
-    E.month.onchange = loadData;
-    E.refresh.onclick = loadData;
+  E.add.onclick = () => {
+    E.txForm.reset();
+    E.date.value = new Date().toISOString().slice(0, 10);
+    E.modal.classList.add("show");
+  };
 
-    E.add.onclick = () => {
-        E.txForm.reset();
-        E.date.value = new Date().toISOString().slice(0, 10);
-        E.modal.classList.add("show");
-    };
+  E.cancel.onclick = () => E.modal.classList.remove("show");
 
-    E.cancel.onclick = () =>
-        E.modal.classList.remove("show");
+  E.txForm.onsubmit = addTx;
+  E.rows.onclick = deleteTx;
 
-    E.txForm.onsubmit = addTx;
-    E.rows.onclick = deleteTx;
+  E.saveBudget.onclick = saveBudget;
+  E.exportBtn.onclick = exportJson;
 
-    E.saveBudget.onclick = saveBudget;
-    E.exportBtn.onclick = exportJson;
+  // Catégorisation automatique
+  E.label.addEventListener("input", () => {
+    const categorie = detectCategory(E.label.value);
 
-    // Catégorisation automatique
-    E.label.addEventListener("input", () => {
+    console.log("Catégorie trouvée :", categorie);
 
-        const categorie = detectCategory(
-            E.label.value
-        );
-
-        console.log(
-            "Catégorie trouvée :",
-            categorie
-        );
-
-        if (categorie) {
-            E.category.value = categorie;
-        }
-
-    });
-
+    if (categorie) {
+      E.category.value = categorie;
+    }
+  });
 }
 async function login(e) {
   e.preventDefault();
