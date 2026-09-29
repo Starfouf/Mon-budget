@@ -111,9 +111,6 @@ async function suggestRule(label, category) {
     );
 
     const normalizedLabel = normalize(label);
-}
-
-    const normalizedLabel = normalize(label);
 
   if (!normalizedLabel || detectCategory(normalizedLabel)) return;
 
