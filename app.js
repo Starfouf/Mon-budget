@@ -96,7 +96,14 @@ async function loadCategoryRules() {
 }
 
 async function suggestRule(label, category) {
-  const normalizedLabel = normalize(label);
+
+    console.log(
+        "suggestRule appelée",
+        label,
+        category
+    );
+
+    const normalizedLabel = normalize(label);
 
   if (!normalizedLabel || detectCategory(normalizedLabel)) return;
 
