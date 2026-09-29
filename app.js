@@ -1,4 +1,78 @@
 "use strict";
+
+const AUTO_CATEGORIES = {
+
+    // Courses
+    "carrefour": "Courses",
+    "leclerc": "Courses",
+    "auchan": "Courses",
+    "intermarche": "Courses",
+    "lidl": "Courses",
+    "aldi": "Courses",
+    "u express": "Courses",
+
+    // Restaurant
+    "mcdonald": "Restaurant",
+    "burger king": "Restaurant",
+    "kfc": "Restaurant",
+    "uber eats": "Livraison repas",
+    "deliveroo": "Livraison repas",
+
+    // Transport
+    "sncf": "Train",
+    "total": "Carburant",
+    "esso": "Carburant",
+    "shell": "Carburant",
+    "bp": "Carburant",
+
+    // Logement
+    "edf": "Électricité",
+    "engie": "Gaz",
+    "orange": "Internet",
+    "free": "Internet",
+    "sfr": "Internet",
+    "bouygues": "Internet",
+
+    // Loisirs
+    "steam": "Jeux vidéo",
+    "playstation": "Jeux vidéo",
+    "xbox": "Jeux vidéo",
+
+    // Streaming
+    "spotify": "Spotify",
+    "netflix": "Netflix",
+    "youtube": "YouTube Premium",
+    "prime video": "Abonnements",
+
+    // Maison
+    "ikea": "Mobilier",
+    "leroy merlin": "Bricolage",
+    "castorama": "Bricolage",
+    "boulanger": "Électroménager",
+    "darty": "Électroménager",
+
+    // Sport
+    "decathlon": "Sport",
+
+    // Santé
+    "pharmacie": "Pharmacie",
+    "doctolib": "Médecin"
+};
+
+function detectCategory(label) {
+
+    const libelle = label.toLowerCase().trim();
+
+    for (const keyword in AUTO_CATEGORIES) {
+
+        if (libelle.includes(keyword)) {
+            return AUTO_CATEGORIES[keyword];
+        }
+
+    }
+
+    return "";
+}
 const cfg = window.BUDGET_CONFIG || {};
 const configured = !String(cfg.supabaseUrl).startsWith("REMPLACEZ_");
 const db = configured
@@ -96,21 +170,47 @@ async function boot() {
   db.auth.onAuthStateChange((_e, s) => (s ? signedIn(s.user) : signedOut()));
 }
 function bind() {
-  E.authForm.onsubmit = login;
-  E.signup.onclick = signup;
-  E.logout.onclick = () => db.auth.signOut();
-  E.month.onchange = loadData;
-  E.refresh.onclick = loadData;
-  E.add.onclick = () => {
-    E.txForm.reset();
-    E.date.value = new Date().toISOString().slice(0, 10);
-    E.modal.classList.add("show");
-  };
-  E.cancel.onclick = () => E.modal.classList.remove("show");
-  E.txForm.onsubmit = addTx;
-  E.rows.onclick = deleteTx;
-  E.saveBudget.onclick = saveBudget;
-  E.exportBtn.onclick = exportJson;
+
+    E.authForm.onsubmit = login;
+    E.signup.onclick = signup;
+    E.logout.onclick = () => db.auth.signOut();
+
+    E.month.onchange = loadData;
+    E.refresh.onclick = loadData;
+
+    E.add.onclick = () => {
+        E.txForm.reset();
+        E.date.value = new Date().toISOString().slice(0, 10);
+        E.modal.classList.add("show");
+    };
+
+    E.cancel.onclick = () =>
+        E.modal.classList.remove("show");
+
+    E.txForm.onsubmit = addTx;
+    E.rows.onclick = deleteTx;
+
+    E.saveBudget.onclick = saveBudget;
+    E.exportBtn.onclick = exportJson;
+
+    // Catégorisation automatique
+    E.label.addEventListener("input", () => {
+
+        const categorie = detectCategory(
+            E.label.value
+        );
+
+        console.log(
+            "Catégorie trouvée :",
+            categorie
+        );
+
+        if (categorie) {
+            E.category.value = categorie;
+        }
+
+    });
+
 }
 async function login(e) {
   e.preventDefault();
